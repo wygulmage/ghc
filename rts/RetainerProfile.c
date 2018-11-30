@@ -258,7 +258,7 @@ static INLINE void
 returnToOldStack( bdescr *bd )
 {
     currentStack = bd;
-    stackTop = (stackElement *)bd->free;
+    stackTop = (stackElement *)bdescr_free(bd);
     stackBottom = (stackElement *)bdescr_start(bd);
     stackLimit = (stackElement *)(bdescr_start(bd) + BLOCK_SIZE_W * bd->blocks);
     bd->free = (StgPtr)stackLimit;
@@ -713,7 +713,7 @@ popOffReal(void)
 
     // currentStack->free is updated when the active stack is switched back
     // to the previous stack.
-    currentStack->free = (StgPtr)stackLimit;
+    bdescr_set_free(currentStack, (StgPtr)stackLimit);
 
     // find the previous block descriptor
     pbd = currentStack->u.back;
@@ -1782,7 +1782,7 @@ computeRetainerSet( void )
         // visited during retainer profiling.
         for (n = 0; n < n_capabilities; n++) {
           for (bd = capabilities[n]->mut_lists[g]; bd != NULL; bd = bd->link) {
-            for (ml = bdescr_start(bd); ml < bd->free; ml++) {
+            for (ml = bdescr_start(bd); ml < bdescr_free(bd); ml++) {
 
                 maybeInitRetainerSet((StgClosure *)*ml);
 
@@ -2078,15 +2078,15 @@ heapCheck( bdescr *bd )
     costSum = 0;
     while (bd != NULL) {
         p = bdescr_start(bd);
-        while (p < bd->free) {
+        while (p < bdescr_free(bd)) {
             size = sanityCheckHeapClosure((StgClosure *)p);
             sumOfCostLinear += size;
             costArrayLinear[get_itbl((StgClosure *)p)->type] += size;
             p += size;
             // no need for slop check; I think slops are not used currently.
         }
-        ASSERT(p == bd->free);
-        costSum += bd->free - bdescr_start(bd);
+        ASSERT(p == bdescr_free(bd));
+        costSum += bdescr_free(bd) - bdescr_start(bd);
         bd = bd->link;
     }
 
@@ -2100,7 +2100,7 @@ chainCheck(bdescr *bd)
 
     costSum = 0;
     while (bd != NULL) {
-        // bd->free - bdescr_start(bd) is not an accurate measurement of the
+        // bdescr_free(bd) - bdescr_start(bd) is not an accurate measurement of the
         // object size.  Actually it is always zero, so we compute its
         // size explicitly.
         size = sanityCheckHeapClosure((StgClosure *)bdescr_start(bd));
@@ -2159,7 +2159,7 @@ findPointer(StgPtr p)
         // if (g == 0 && s == 0) continue;
         bd = generations[g].blocks;
         for (; bd; bd = bd->link) {
-            for (q = bdescr_start(bd); q < bd->free; q++) {
+            for (q = bdescr_start(bd); q < bdescr_free(bd); q++) {
                 if (*q == (StgWord)p) {
                     r = q;
                     while (!LOOKS_LIKE_GHC_INFO(*r)) r--;
@@ -2193,7 +2193,7 @@ belongToHeap(StgPtr p)
        // if (g == 0 && s == 0) continue;
        bd = generations[g].blocks;
        for (; bd; bd = bd->link) {
-           if (bdescr_start(bd) <= p && p < bd->free) {
+           if (bdescr_start(bd) <= p && p < bdescr_free(bd)) {
                debugBelch("Belongs to gen[%d]", g);
                return;
            }

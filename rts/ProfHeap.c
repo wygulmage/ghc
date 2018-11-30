@@ -1023,7 +1023,7 @@ heapCensusChain( Census *census, bdescr *bd )
             continue;
         }
 
-        while (p < bd->free) {
+        while (p < bdescr_free(bd)) {
             info = get_itbl((const StgClosure *)p);
             prim = false;
 
