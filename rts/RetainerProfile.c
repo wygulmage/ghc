@@ -190,7 +190,7 @@ static void retainActualPush( stackElement *se);
   Invariants:
     firstStack points to the first block group.
     currentStack points to the block group currently being used.
-    currentStack->free == stackLimit.
+    bdescr_free(currentStack) == stackLimit.
     stackTop points to the topmost byte in the stack of currentStack.
     Unless the whole stack is empty, stackTop must point to the topmost
     object (or byte) in the whole stack. Thus, it is only when the whole stack
@@ -246,7 +246,7 @@ newStackBlock( bdescr *bd )
     stackTop     = (stackElement *)(bdescr_start(bd) + BLOCK_SIZE_W * bd->blocks);
     stackBottom  = (stackElement *)bdescr_start(bd);
     stackLimit   = (stackElement *)stackTop;
-    bd->free     = (StgPtr)stackLimit;
+    bd->free_off = BLOCK_SIZE * bd->blocks;
 }
 
 /* -----------------------------------------------------------------------------
@@ -261,7 +261,7 @@ returnToOldStack( bdescr *bd )
     stackTop = (stackElement *)bdescr_free(bd);
     stackBottom = (stackElement *)bdescr_start(bd);
     stackLimit = (stackElement *)(bdescr_start(bd) + BLOCK_SIZE_W * bd->blocks);
-    bd->free = (StgPtr)stackLimit;
+    bd->free_off = BLOCK_SIZE * bd->blocks;
 }
 
 /* -----------------------------------------------------------------------------
