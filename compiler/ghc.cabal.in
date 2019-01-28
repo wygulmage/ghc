@@ -484,6 +484,7 @@ Library
         StgFVs
         CallArity
         DmdAnal
+        CprAnal
         Exitify
         WorkWrap
         WwLib
