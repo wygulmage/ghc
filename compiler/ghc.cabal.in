@@ -222,6 +222,7 @@ Library
         DataCon
         PatSyn
         Demand
+        Cpr
         Debug
         Exception
         FieldLabel
