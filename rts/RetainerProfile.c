@@ -2077,16 +2077,17 @@ heapCheck( bdescr *bd )
 
     costSum = 0;
     while (bd != NULL) {
+        const StgPtr free = bdescr_free(bd);
         p = bdescr_start(bd);
-        while (p < bdescr_free(bd)) {
+        while (p < free) {
             size = sanityCheckHeapClosure((StgClosure *)p);
             sumOfCostLinear += size;
             costArrayLinear[get_itbl((StgClosure *)p)->type] += size;
             p += size;
             // no need for slop check; I think slops are not used currently.
         }
-        ASSERT(p == bdescr_free(bd));
-        costSum += bdescr_free(bd) - bdescr_start(bd);
+        ASSERT(p == free);
+        costSum += free - bdescr_start(bd);
         bd = bd->link;
     }
 
