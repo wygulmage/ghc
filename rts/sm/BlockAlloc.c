@@ -514,9 +514,10 @@ finish:
 // allocate `2*n - 1` blocks here to make sure we'll be able to find an aligned
 // region in the allocated blocks. After finding the aligned area we want to
 // free slop on the low and high sides, and block allocator doesn't support
-// freeing only some portion of a megablock (we can only free whole megablocks).
-// So we disallow allocating megablocks here, and allow allocating at most
-// `BLOCKS_PER_MBLOCK / 2` blocks.
+// freeing only some portion of a megablock grolup (we can only free whole
+// megablocks in megablock groups). So we disallow allocating more than a
+// megablock here, and allow allocating at most `BLOCKS_PER_MBLOCK/2 - 1`
+// blocks.
 bdescr *
 allocAlignedGroupOnNode (uint32_t node, W_ n)
 {
@@ -526,7 +527,7 @@ allocAlignedGroupOnNode (uint32_t node, W_ n)
     // number of blocks to allocate to make sure we have enough aligned space
     W_ num_blocks = 2*n - 1;
 
-    if (num_blocks >= BLOCKS_PER_MBLOCK) {
+    if (num_blocks > BLOCKS_PER_MBLOCK) {
         barf("allocAlignedGroupOnNode: allocating megablocks is not supported\n"
              "    requested blocks: %" FMT_Word "\n"
              "    required for alignment: %" FMT_Word "\n"
@@ -537,11 +538,11 @@ allocAlignedGroupOnNode (uint32_t node, W_ n)
     W_ group_size = n * BLOCK_SIZE;
 
     // To reduce splitting and fragmentation we use allocLargeChunkOnNode here.
-    // Tweak the max allocation to avoid allocating megablocks. Splitting slop
-    // below doesn't work with megablocks (freeGroup can't free only a portion
-    // of a megablock so we can't allocate megablocks and free some parts of
-    // them).
-    W_ max_blocks = stg_min(num_blocks * 3, BLOCKS_PER_MBLOCK - 1);
+    // Tweak the max allocation to avoid allocating more than one megablock.
+    // Splitting slop below doesn't work with more than one megablock (freeGroup
+    // can't free only a portion of a megablock group so we can't allocate
+    // multiple megablocks and free some parts of them).
+    W_ max_blocks = stg_min(num_blocks * 3, BLOCKS_PER_MBLOCK);
     bdescr *bd = allocLargeChunkOnNode(node, num_blocks, max_blocks);
     // We may allocate more than num_blocks, so update it
     num_blocks = bd->blocks;
