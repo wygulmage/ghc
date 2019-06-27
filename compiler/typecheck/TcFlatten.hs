@@ -1455,11 +1455,12 @@ flatten_exact_fam_app_fully tc tys
                        ; when (eq_rel == NomEq) $
                          liftTcS $
                          extendFlatCache tc tys ( co, xi, flavour )
-                       ; let xi' = xi `mkCastTy` kind_co
-                             role = eqRelRole eq_rel
+                       ; let role = eqRelRole eq_rel
+                             xi' = xi `mkCastTy` kind_co
                              -- See Note [Zapping coercions]
-                             co' = mkZappedCoercion dflags (mkSymCo co) (Pair xi' fam_ty) Nominal fvs
-                             co'' = update_co $ mkTcCoherenceLeftCo role xi kind_co co'
+                             co' = mkTcCoherenceLeftCo role xi kind_co (mkSymCo co)
+                             co'' = update_co $
+                                    mkZappedCoercion dflags co' (Pair xi' fam_ty) Nominal fvs
                        ; return $ Just (xi', co'') }
                Nothing -> pure Nothing }
 
