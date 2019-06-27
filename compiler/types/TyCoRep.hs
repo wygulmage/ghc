@@ -2005,6 +2005,7 @@ mkZappedCoercion dflags co (Pair ty1 ty2) role fCvs
     , text "given ty2:" <+> ppr ty2
     , text "real free co vars:" <+> ppr real_fCvs
     , text "given free co vars:" <+> ppr fCvs
+    , text "coercion:" <+> ppr co
     ]
   | debugIsOn && not (allDVarSet isCoVar fCvs) =
     pprPanic "mkZappedCoercion" $ text "non-covar in free variable list:" <+> ppr fCvs
