@@ -1343,6 +1343,7 @@ flatten_exact_fam_app_fully tc tys
                                         -- each arg
                       flatten_args_tc tc (repeat Nominal) tys
                       -- kind_co :: tcTypeKind(F xis) ~N tcTypeKind(F tys)
+                      -- cos !! n :: (xis !! n) ~N  (tys !! n)
                ; eq_rel   <- getEqRel
                ; cur_flav <- getFlavour
                ; let role   = eqRelRole eq_rel
@@ -1440,16 +1441,18 @@ flatten_exact_fam_app_fully tc tys
            ; case mb_match of
                  -- NB: norm_co will always be homogeneous. All type families
                  -- are homogeneous.
-               Just (norm_co, norm_ty)
+               Just (norm_co, norm_ty)  -- norm_co :: fam_ty ~R norm_ty
                  -> do { traceFlat "Eager T.F. reduction success" $
                          vcat [ ppr tc, ppr tys, ppr norm_ty
                               , ppr norm_co <+> dcolon
                                             <+> ppr (coercionKind norm_co)
                               ]
                        ; (xi, final_co) <- bumpDepth $ flatten_one norm_ty
+                           -- final_co :: xi ~ norm_ty
                        ; eq_rel <- getEqRel
                        ; let co = maybeSubCo eq_rel norm_co
                                    `mkTransCo` mkSymCo final_co
+                               -- co :: fam_ty ~eq_rel xi
                        ; flavour <- getFlavour
                            -- NB: only extend cache with nominal equalities
                        ; when (eq_rel == NomEq) $
@@ -1459,9 +1462,29 @@ flatten_exact_fam_app_fully tc tys
                              xi' = xi `mkCastTy` kind_co
                              -- See Note [Zapping coercions]
                              co' = mkTcCoherenceLeftCo role xi kind_co (mkSymCo co)
-                             co'' = update_co $
-                                    mkZappedCoercion dflags co' (Pair xi' fam_ty) Nominal fvs
-                       ; return $ Just (xi', co'') }
+                             co'_kind = Pair xi' fam_ty
+                               -- co' :: (xi |> kind_co) ~role fam_ty
+                             co'' = update_co $ mkZappedCoercion dflags co' co'_kind Nominal fvs
+                       ; let Pair real_ty1 real_ty2 = coercionKind co'
+                             Pair t1 t2 = co'_kind
+                             okay = real_ty1 `eqType` t1
+                                 && real_ty2 `eqType` t2
+                             pprCo co = ppr co <+> dcolon <+> ppr (coercionKind co)
+                             doc = text "xi:" <+> ppr xi
+                                $$ text "xi':" <+> ppr xi'
+                                $$ text "fam_ty:" <+> ppr fam_ty
+                                $$ text "norm_co:" <+> pprCo norm_co
+                                $$ text "norm_ty:" <+> ppr norm_ty
+                                $$ text "final_co:" <+> pprCo final_co
+                                $$ text "co:" <+> pprCo co
+                                $$ text "co':" <+> pprCo co'
+                                $$ text "updated co':" <+> pprCo (update_co co')
+                                $$ text "kind_co:" <+> pprCo kind_co
+                                $$ text "expected:" <+> ppr co'_kind
+                                $$ text "tycon:" <+> ppr tc
+                                $$ text "tys:" <+> ppr tys
+                         in ASSERT2(okay, doc)
+                         return $ Just (xi', co'') }
                Nothing -> pure Nothing }
 
     try_to_reduce_nocache :: TyCon   -- F, family tycon
