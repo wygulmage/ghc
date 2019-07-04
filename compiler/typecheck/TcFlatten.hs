@@ -1465,26 +1465,7 @@ flatten_exact_fam_app_fully tc tys
                              co'_kind = Pair xi' fam_ty
                                -- co' :: (xi |> kind_co) ~role fam_ty
                              co'' = update_co $ mkZappedCoercion dflags co' co'_kind Nominal fvs
-                       ; let Pair real_ty1 real_ty2 = coercionKind co'
-                             Pair t1 t2 = co'_kind
-                             okay = real_ty1 `eqType` t1
-                                 && real_ty2 `eqType` t2
-                             pprCo co = ppr co <+> dcolon <+> ppr (coercionKind co)
-                             doc = text "xi:" <+> ppr xi
-                                $$ text "xi':" <+> ppr xi'
-                                $$ text "fam_ty:" <+> ppr fam_ty
-                                $$ text "norm_co:" <+> pprCo norm_co
-                                $$ text "norm_ty:" <+> ppr norm_ty
-                                $$ text "final_co:" <+> pprCo final_co
-                                $$ text "co:" <+> pprCo co
-                                $$ text "co':" <+> pprCo co'
-                                $$ text "updated co':" <+> pprCo (update_co co')
-                                $$ text "kind_co:" <+> pprCo kind_co
-                                $$ text "expected:" <+> ppr co'_kind
-                                $$ text "tycon:" <+> ppr tc
-                                $$ text "tys:" <+> ppr tys
-                         in ASSERT2(okay, doc)
-                         return $ Just (xi', co'') }
+                       ; return $ Just (xi', co'') }
                Nothing -> pure Nothing }
 
     try_to_reduce_nocache :: TyCon   -- F, family tycon
