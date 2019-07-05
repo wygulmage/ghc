@@ -1576,8 +1576,9 @@ mkCoCast c g
 
 Coercions for even small programs can grow to be quite large (e.g. #8095),
 especially when type families are involved. For instance, the case of addition
-of inductive naturals can build coercions quadratic in size of the summands.
-For instance, consider the type-level addition operation defined on Peano naturals,
+of inductive natural numbers can build coercions quadratic in size of the
+summands.  For instance, consider the type-level addition operation defined on
+Peano naturals,
 
     data Nat = Z | Succ Nat
 
@@ -1610,8 +1611,9 @@ is replaced by
     UnivCo (ZappedProv fvs) r t1 t2
 
 To ensure that such coercions aren't floated out of the scope of proofs they
-require, the ZappedProv constructor includes the coercion's set of free coercion
-variables (as a DVarSet, since these sets are included in interface files).
+require, the ZappedProv constructor includes the coercion's set of free type
+and coercion variables (as a DVarSet, since these sets are included in
+interface files).
 
 
 Zapping during type family reduction
@@ -1716,10 +1718,6 @@ that are present in the unzapped coercion but not its kind. This manifests in a
 few places (these are labelled in the source with the [ZappedCoDifference]
 keyword):
 
- * Since we only track a zapped coercion's free *coercion* variables, the
-   simplifier may float such coercions farther than it would have if the proof
-   were present.
-
  * IfaceSyn.freeNamesIfCoercion will fail to report top-level names present in
    the unzapped proof but not its kind.
 
@@ -1748,18 +1746,18 @@ mkZappedCoercion :: HasDebugCallStack
                  -> Coercion  -- ^ the un-zapped coercion
                  -> Pair Type -- ^ the kind of the coercion
                  -> Role      -- ^ the role of the coercion
-                 -> DCoVarSet -- ^ the free coercion variables of the coercion
+                 -> DTyCoVarSet -- ^ the free variables of the coercion
                  -> Coercion
-mkZappedCoercion dflags co (Pair ty1 ty2) role fCvs
+mkZappedCoercion dflags co (Pair ty1 ty2) role fvs
   | debugIsOn && real_role /= role =
     pprPanic "mkZappedCoercion(roles mismatch)" panic_doc
   | debugIsOn && not co_kind_ok =
     pprPanic "mkZappedCoercion(kind mismatch)" panic_doc
-  | debugIsOn && not (allDVarSet isCoVar fCvs) =
-    pprPanic "mkZappedCoercion" $ text "non-covar in free variable list:" <+> ppr fCvs
+  | debugIsOn && not (allDVarSet isCoVar fvs) =
+    pprPanic "mkZappedCoercion" $ text "non-covar in free variable list:" <+> ppr fvs
   | shouldBuildCoercions dflags = co
   | otherwise =
-    mkUnivCo (ZappedProv fCvs) role ty1 ty2
+    mkUnivCo (ZappedProv fvs) role ty1 ty2
   where
     (Pair real_ty1 real_ty2, real_role) = coercionKindRole co
     real_fCvs = filterVarSet isCoVar (coVarsOfCo co)
