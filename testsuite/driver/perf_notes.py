@@ -508,8 +508,8 @@ def check_stats_change(actual, baseline, tolerance_dev, allowed_perf_changes = {
     # Print errors and create pass/fail object.
     result = passed()
     if not change_allowed:
-        error = change + ' from ' + baseline.perfStat.test_env + \
-                ' baseline @ HEAD~' + str(baseline.commitDepth)
+        error = '{change} from {test_env} baseline @ HEAD~{depth}'.format(
+            change=change, test_env=baseline.perfStat.test_env, depth=baseline.commitDepth)
         print(actual.metric, error + ':')
         result = failBecause('stat ' + error, tag='stat')
 
