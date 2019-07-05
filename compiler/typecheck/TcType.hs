@@ -1014,7 +1014,7 @@ exactTyCoVarsOfType ty
     goCo (SubCo co)          = goCo co
     goCo (AxiomRuleCo _ c)   = goCos c
 
-    goCos cos = foldr (unionVarSet . goCo) emptyVarSet cos
+    goCos cos = foldl' (flip $ unionVarSet . goCo) emptyVarSet cos
 
     goProv UnsafeCoerceProv     = emptyVarSet
     goProv (PhantomProv kco)    = goCo kco
