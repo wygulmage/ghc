@@ -163,7 +163,7 @@ import {-# SOURCE #-} Type( isCoercionTy, mkAppTy, mkCastTy
                           , tyCoVarsOfTypeWellScoped
                           , tyCoVarsOfTypesWellScoped
                           , scopedSort
-                          , coreView, eqType )
+                          , coreView )
    -- Transitively pulls in a LOT of stuff, better to break the loop
 
 import {-# SOURCE #-} Coercion
