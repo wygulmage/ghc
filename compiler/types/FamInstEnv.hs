@@ -1747,7 +1747,7 @@ allTyCoVarsInTy = go
     go_prov (PhantomProv co)    = go_co co
     go_prov (ProofIrrelProv co) = go_co co
     go_prov (PluginProv _)      = emptyVarSet
-    go_prov (ZappedProv fvs)    = fvs
+    go_prov (ZappedProv fvs)    = dVarSetToVarSet fvs
 
 mkFlattenFreshTyName :: Uniquable a => a -> Name
 mkFlattenFreshTyName unq
