@@ -990,6 +990,14 @@ mkTransCo co1 co2 | isReflCo co1 = co2
                   | isReflCo co2 = co1
 mkTransCo (GRefl r t1 (MCo co1)) (GRefl _ _ (MCo co2))
   = GRefl r t1 (MCo $ mkTransCo co1 co2)
+mkTransCo (UnivCo (ZappedProv fvs1) r t1a _t1b) (UnivCo (ZappedProv fvs2) _ _t2a t2b)
+  = UnivCo (ZappedProv (fvs1 `unionDVarSet` fvs2)) r t1a t2b
+mkTransCo (UnivCo (ZappedProv fvs) r t1a _t1b) co2
+  = UnivCo (ZappedProv (fvs `unionDVarSet` tyCoVarsOfCoDSet co2)) r t1a t2b
+  where Pair _t2a t2b = coercionKind co2
+mkTransCo co1 (UnivCo (ZappedProv fvs) r _t2a t2b)
+  = UnivCo (ZappedProv (fvs `unionDVarSet` tyCoVarsOfCoDSet co1)) r t1a t2b
+  where Pair t1a _t1b = coercionKind co1
 mkTransCo co1 co2                 = TransCo co1 co2
 
 -- | Compose two MCoercions via transitivity
