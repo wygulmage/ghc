@@ -1765,6 +1765,8 @@ mkZappedCoercion dflags co (Pair ty1 ty2) role fvs
   | debugIsOn && not (allDVarSet isCoVar fvs) =
     pprPanic "mkZappedCoercion" $ text "non-covar in free variable list:" <+> ppr fvs
   | shouldBuildCoercions dflags = co
+  | otherwise =
+    mkUnivCo (ZappedProv fvs) role ty1 ty2
   where
     (Pair real_ty1 real_ty2, real_role) = coercionKindRole co
     real_fCvs = filterVarSet isCoVar (coVarsOfCo co)
@@ -1786,32 +1788,15 @@ mkZappedCoercion dflags co (Pair ty1 ty2) role fvs
         , text "given free co vars:" <+> ppr fvs
         , text "coercion:" <+> ppr co
         ]
--- The following cases are all not worth zapping since they
--- are all of an equal or smaller size than a zapped coercion
-mkZappedCoercion _ co _ _ _ | pprTrace "zap?" (ppr co) False = undefined
-mkZappedCoercion _ co0 kind role0 fvs =
-    case go co0 role0 of
-      Just zapped_co -> zapped_co
-      Nothing -> co0
-  where
-    go (UnivCo _ _ _ _) _    = Nothing
-    go (Refl _) _            = Nothing
-    go (CoVarCo _) _         = Nothing
-    go (SymCo co) r          = fmap SymCo (go co r)
-    go (AxiomRuleCo _ _) _   = Nothing
-    go (AxiomInstCo _ _ _) _ = Nothing
-    go (SubCo co) r          = ASSERT(coercionRole co == Nominal)
-                               fmap SubCo (go co r)
-    go _co r                 = let Pair ty1 ty2 = kind
-                               in Just $ mkUnivCo (ZappedProv fvs) r ty1 ty2
 
 -- | Replace a coercion with a zapped coercion unless coercions are needed.
 zapCoercion :: DynFlags -> Coercion -> Coercion
+zapCoercion _ co@(UnivCo (ZappedProv _) _ _ _) = co  -- already zapped
 zapCoercion _ co@(Refl _) = co  -- Refl is smaller than zapped coercions
 zapCoercion dflags co =
-    mkZappedCoercion dflags co kind role fvs
+    mkZappedCoercion dflags co (Pair t1 t2) role fvs
   where
-    (kind, role) = coercionKindRole co
+    (Pair t1 t2, role) = coercionKindRole co
     fvs = filterDVarSet isCoVar $ tyCoVarsOfCoDSet co
 
 
