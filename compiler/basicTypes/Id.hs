@@ -143,6 +143,7 @@ import RepType
 import TysPrim
 import DataCon
 import Demand
+import Cpr
 import Name
 import Module
 import Class
@@ -673,10 +674,10 @@ idStrictness id = strictnessInfo (idInfo id)
 setIdStrictness :: Id -> StrictSig -> Id
 setIdStrictness id sig = modifyIdInfo (`setStrictnessInfo` sig) id
 
-idCprInfo       :: Id -> CPRResult
+idCprInfo       :: Id -> CprResult
 idCprInfo       id = cprInfo (idInfo id)
 
-setIdCprInfo :: Id -> CPRResult -> Id
+setIdCprInfo :: Id -> CprResult -> Id
 setIdCprInfo id cpr = modifyIdInfo (\info -> setCprInfo info cpr) id
 
 zapIdStrictness :: Id -> Id

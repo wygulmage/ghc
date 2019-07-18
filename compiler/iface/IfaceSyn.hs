@@ -48,6 +48,7 @@ import BinFingerprint
 import CoreSyn( IsOrphan, isOrphan )
 import PprCore()            -- Printing DFunArgs
 import Demand
+import Cpr
 import Class
 import FieldLabel
 import NameSet
@@ -340,7 +341,7 @@ data IfaceIdInfo
 data IfaceInfoItem
   = HsArity         Arity
   | HsStrictness    StrictSig
-  | HsCpr           CPRResult
+  | HsCpr           CprResult
   | HsInline        InlinePragma
   | HsUnfold        Bool             -- True <=> isStrongLoopBreaker is true
                     IfaceUnfolding   -- See Note [Expose recursive functions]
