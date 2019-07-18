@@ -62,7 +62,7 @@ import InstEnv     ( instanceDFunId )
 import OptCoercion ( checkAxInstCo )
 import UniqSupply
 import CoreArity ( typeArity )
-import Demand ( splitStrictSig, isBotRes )
+import Demand ( splitStrictSig, isBotDiv )
 
 import HscTypes
 import DynFlags
@@ -585,7 +585,7 @@ lintSingleBinding top_lvl_flag rec_flag (binder,rhs)
            ppr binder)
 
        ; case splitStrictSig (idStrictness binder) of
-           (demands, result_info) | isBotRes result_info ->
+           (demands, result_info) | isBotDiv result_info ->
              checkL (demands `lengthAtLeast` idArity binder)
                (text "idArity" <+> ppr (idArity binder) <+>
                text "exceeds arity imposed by the strictness signature" <+>
