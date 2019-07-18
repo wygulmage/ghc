@@ -40,7 +40,8 @@ import MkId             ( mkDictSelRhs )
 import IdInfo
 import InstEnv
 import Type             ( tidyTopType )
-import Demand           ( appIsBottom, isTopSig, isBottomingSig )
+import Demand           ( appIsBottom, isTopSig, isBottomingSig, topCpr )
+import Cpr              ( cprFromStrictSig )
 import BasicTypes
 import Name hiding (varName)
 import NameSet
@@ -1189,6 +1190,7 @@ tidyTopIdInfo dflags rhs_tidy_env name orig_rhs tidy_rhs idinfo show_unfold caf_
         `setCafInfo`        caf_info
         `setArityInfo`      arity
         `setStrictnessInfo` final_sig
+        `setCprInfo`        final_cpr
         `setUnfoldingInfo`  minimal_unfold_info  -- See note [Preserve evaluatedness]
                                                  -- in CoreTidy
 
@@ -1197,6 +1199,7 @@ tidyTopIdInfo dflags rhs_tidy_env name orig_rhs tidy_rhs idinfo show_unfold caf_
         `setCafInfo`           caf_info
         `setArityInfo`         arity
         `setStrictnessInfo`    final_sig
+        `setCprInfo`           final_cpr
         `setOccInfo`           robust_occ_info
         `setInlinePragInfo`    (inlinePragInfo idinfo)
         `setUnfoldingInfo`     unfold_info
@@ -1219,6 +1222,13 @@ tidyTopIdInfo dflags rhs_tidy_env name orig_rhs tidy_rhs idinfo show_unfold caf_
               -- try a cheap-and-cheerful bottom analyser
               | Just (_, nsig) <- mb_bot_str = nsig
               | otherwise                    = sig
+
+    cpr = cprInfo idinfo
+    final_cpr | cpr == topCpr
+              , Just (_, nsig) <- mb_bot_str
+              = cprFromStrictSig nsig
+              | otherwise
+              = cpr
 
     _bottom_hidden id_sig = case mb_bot_str of
                                   Nothing         -> False

@@ -61,6 +61,7 @@ import DataCon
 import Id
 import IdInfo
 import Demand
+import Cpr
 import CoreSyn
 import Unique
 import UniqSupply
@@ -410,6 +411,7 @@ mkDictSelId name clas
     base_info = noCafIdInfo
                 `setArityInfo`          1
                 `setStrictnessInfo`     strict_sig
+                `setCprInfo`            cprFromStrictSig strict_sig
                 `setLevityInfoWithType` sel_ty
 
     info | new_tycon
@@ -506,6 +508,7 @@ mkDataConWorkId wkr_name data_con
     alg_wkr_info = noCafIdInfo
                    `setArityInfo`          wkr_arity
                    `setStrictnessInfo`     wkr_sig
+                   `setCprInfo`            cprFromStrictSig wkr_sig
                    `setUnfoldingInfo`      evaldUnfolding  -- Record that it's evaluated,
                                                            -- even if arity = 0
                    `setLevityInfoWithType` wkr_ty
@@ -650,6 +653,7 @@ mkDataConRep dflags fam_envs wrap_name mb_bangs data_con
                          `setInlinePragInfo`    wrap_prag
                          `setUnfoldingInfo`     wrap_unf
                          `setStrictnessInfo`    wrap_sig
+                         `setCprInfo`           cprFromStrictSig wrap_sig
                              -- We need to get the CAF info right here because TidyPgm
                              -- does not tidy the IdInfo of implicit bindings (like the wrapper)
                              -- so it not make sure that the CAF info is sane
@@ -1219,6 +1223,7 @@ mkPrimOpId prim_op
            `setRuleInfo`           mkRuleInfo (maybeToList $ primOpRules name prim_op)
            `setArityInfo`          arity
            `setStrictnessInfo`     strict_sig
+           `setCprInfo`            cprFromStrictSig strict_sig
            `setInlinePragInfo`     neverInlinePragma
            `setLevityInfoWithType` res_ty
                -- We give PrimOps a NOINLINE pragma so that we don't
@@ -1251,6 +1256,7 @@ mkFCallId dflags uniq fcall ty
     info = noCafIdInfo
            `setArityInfo`          arity
            `setStrictnessInfo`     strict_sig
+           `setCprInfo`            cprFromStrictSig strict_sig
            `setLevityInfoWithType` ty
 
     (bndrs, _) = tcSplitPiTys ty
