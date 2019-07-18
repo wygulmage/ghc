@@ -71,7 +71,6 @@ import TysPrim
 import DataCon          ( DataCon, dataConWorkId )
 import IdInfo
 import Demand
-import Cpr
 import Name      hiding ( varName )
 import Outputable
 import FastString
