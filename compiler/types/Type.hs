@@ -269,8 +269,7 @@ import FV
 import Outputable
 import FastString
 import Pair
-import DynFlags  ( HasDynFlags(..)
-                 , gopt_set, GeneralFlag(Opt_PrintExplicitRuntimeReps) )
+import DynFlags  ( gopt_set, GeneralFlag(Opt_PrintExplicitRuntimeReps) )
 import ListSetOps
 import Unique ( nonDetCmpUnique )
 
@@ -552,7 +551,7 @@ data TyCoMapper env m
       }
 
 {-# INLINABLE mapType #-}  -- See Note [Specialising mappers]
-mapType :: (Monad m, HasDynFlags m)
+mapType :: (Monad m)
         => TyCoMapper env m -> env -> Type -> m Type
 mapType mapper@(TyCoMapper { tcm_tyvar = tyvar
                            , tcm_tycobinder = tycobinder
@@ -588,7 +587,7 @@ mapType mapper@(TyCoMapper { tcm_tyvar = tyvar
            ; return $ ForAllTy (Bndr tv' vis) inner' }
 
 {-# INLINABLE mapCoercion #-}  -- See Note [Specialising mappers]
-mapCoercion :: (Monad m, HasDynFlags m)
+mapCoercion :: (Monad m)
             => TyCoMapper env m -> env -> Coercion -> m Coercion
 mapCoercion mapper@(TyCoMapper { tcm_covar = covar
                                , tcm_tyvar = tyvar

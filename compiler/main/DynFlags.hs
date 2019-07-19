@@ -46,7 +46,6 @@ module DynFlags (
         DynFlags(..),
         FlagSpec(..),
         HasDynFlags(..), ContainsDynFlags(..),
-        DynFlagsEnvM, runDynFlagsEnvM,
         RtsOptsEnabled(..),
         HscTarget(..), isObjectTarget, defaultObjectTarget,
         targetRetainsAllBindings,
@@ -1366,17 +1365,6 @@ instance (Monad m, HasDynFlags m) => HasDynFlags (MaybeT m) where
 
 instance (Monad m, HasDynFlags m) => HasDynFlags (ExceptT e m) where
     getDynFlags = lift getDynFlags
-
--- | A reader monad over 'DynFlags'.
-newtype DynFlagsEnvM a = DynFlagsEnvM (Reader DynFlags a)
-                       deriving (Functor, Applicative, Monad)
-
-instance HasDynFlags DynFlagsEnvM where
-    getDynFlags = DynFlagsEnvM ask
-
-runDynFlagsEnvM :: DynFlags -> DynFlagsEnvM a -> a
-runDynFlagsEnvM dflags (DynFlagsEnvM m) = runReader m dflags
-
 
 class ContainsDynFlags t where
     extractDynFlags :: t -> DynFlags
