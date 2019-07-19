@@ -108,8 +108,8 @@ optCoercion :: DynFlags -> TCvSubst -> Coercion -> NormalCo
 -- ^ optCoercion applies a substitution to a coercion,
 --   *and* optimises it to reduce its size
 optCoercion dflags env co
-  | hasNoOptCoercion dflags           = substCo env co
-  | otherwise                         = optCoercion' env co
+  | hasNoOptCoercion dflags = substCo env co
+  | otherwise               = optCoercion' env co
 
 optCoercion' :: TCvSubst -> Coercion -> NormalCo
 optCoercion' env co
