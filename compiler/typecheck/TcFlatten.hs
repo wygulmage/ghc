@@ -1429,8 +1429,7 @@ flatten_exact_fam_app_fully tc tys
                       -> Coercion )   -- what to return from outer function
                   -> FlatM (Maybe (Xi, Coercion))
     try_to_reduce tc tys kind_co ret_co_fvs update_co
-      = do { let fvs = filterDVarSet isCoVar
-                       $              tyCoVarsOfTypesDSet tys
+      = do { let fvs =                tyCoVarsOfTypesDSet tys
                        `unionDVarSet` tyCoVarsOfCoDSet kind_co
                        `unionDVarSet` ret_co_fvs
                      -- See Note [Zapping coercions] in TyCoRep
@@ -1473,8 +1472,7 @@ flatten_exact_fam_app_fully tc tys
                           -> DTyCoVarSet -- free variables of ret_co
                           -> FlatM (Maybe (Xi, Coercion))
     try_to_reduce_nocache tc tys fvs_ret_co
-      = do { let fvs = filterDVarSet isCoVar $ tyCoVarsOfTypesDSet tys
-                       `unionDVarSet` fvs_ret_co
+      = do { let fvs = tyCoVarsOfTypesDSet tys `unionDVarSet` fvs_ret_co
                      -- See Note [Zapping coercions] in TyCoRep
                  fam_ty = mkTyConApp tc tys
            ; checkStackDepth fam_ty
