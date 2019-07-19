@@ -1829,7 +1829,7 @@ instead do so at call sites, but it seems that we always want to do
 so, so it's easiest to do it here.
 
 It turns out that getting the free variables of types is performance critical,
-o we profiled several versions, exploring different implementation strategies.
+so we profiled several versions, exploring different implementation strategies.
 
 1. Baseline version: uses FV naively. Essentially:
 
