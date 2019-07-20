@@ -275,7 +275,7 @@ toIfaceCoercionX fr co
     go_prov (PhantomProv co)    = IfacePhantomProv (go co)
     go_prov (ProofIrrelProv co) = IfaceProofIrrelProv (go co)
     go_prov (PluginProv str)    = IfacePluginProv str
-    go_prov (ZappedProv fvs)    = IfaceZappedProv tvs cvs fCvs
+    go_prov (ZappedProv fvs)    = IfaceZappedProv tvs cvs openVars
                           where
                             (tvs, cvs, openVars) = foldl' f ([], [], []) (dVarSetElems fvs)
                             isOpen = (`elemVarSet` fr)
