@@ -275,14 +275,15 @@ toIfaceCoercionX fr co
     go_prov (PhantomProv co)    = IfacePhantomProv (go co)
     go_prov (ProofIrrelProv co) = IfaceProofIrrelProv (go co)
     go_prov (PluginProv str)    = IfacePluginProv str
-    go_prov (ZappedProv fvs)    = IfaceZappedProv cvs fCvs
+    go_prov (ZappedProv fvs)    = IfaceZappedProv tvs cvs fCvs
                           where
                             (tvs, cvs, openVars) = foldl' f ([], [], []) (dVarSetElems fvs)
                             isOpen = (`elemVarSet` fr)
                             f (a,b,c) v
                               | isOpen v  = (a, b, v:c)
                               | isCoVar v = (a, toIfaceCoVar v:b, c)
-                              | otherwise = (toIfaceTyVar v:a, b, c)
+                              | isTyVar v = (toIfaceTyVar v:a, b, c)
+                              | otherwise = panic "ToIface.toIfaceCoercionX(go_prov): Bad free variable in ZappedProv"
 
 toIfaceTcArgs :: TyCon -> [Type] -> IfaceAppArgs
 toIfaceTcArgs = toIfaceTcArgsX emptyVarSet
