@@ -1200,7 +1200,7 @@ pushCoTyArg co ty
        -- tyL = forall (a1 :: k1). ty1
        -- tyR = forall (a2 :: k2). ty2
 
-    zap = zapCoercion unsafeGlobalDynFlags
+    zap = zapCoercion dflags
 
     co1 = zap $ mkSymCo (mkNthCo Nominal 0 co)
        -- co1 :: k2 ~N k1

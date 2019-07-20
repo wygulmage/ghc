@@ -1762,8 +1762,6 @@ mkZappedCoercion dflags co (Pair ty1 ty2) role fvs
     pprPanic "mkZappedCoercion(roles mismatch)" panic_doc
   | debugIsOn && not co_kind_ok =
     pprPanic "mkZappedCoercion(kind mismatch)" panic_doc
-  | debugIsOn && not (allDVarSet isCoVar fvs) =
-    pprPanic "mkZappedCoercion" $ text "non-covar in free variable list:" <+> ppr fvs
   | shouldBuildCoercions dflags = co
   | otherwise =
     mkUnivCo (ZappedProv fvs) role ty1 ty2

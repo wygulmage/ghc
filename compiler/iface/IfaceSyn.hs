@@ -1530,7 +1530,7 @@ freeNamesIfProv IfaceUnsafeCoerceProv    = emptyNameSet
 freeNamesIfProv (IfacePhantomProv co)    = freeNamesIfCoercion co
 freeNamesIfProv (IfaceProofIrrelProv co) = freeNamesIfCoercion co
 freeNamesIfProv (IfacePluginProv _)      = emptyNameSet
-freeNamesIfProv (IfaceZappedProv _ _)    = emptyNameSet
+freeNamesIfProv (IfaceZappedProv _ _ _)  = emptyNameSet
   -- [ZappedCoDifference]: This won't report top-level names present in the
   -- unzapped proof but not its kind.
 

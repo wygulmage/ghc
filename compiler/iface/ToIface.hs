@@ -278,10 +278,12 @@ toIfaceCoercionX fr co
     go_prov (ZappedProv fvs)    = IfaceZappedProv cvs fCvs
                           where
                             (fCvs, cvs) = partitionWith f $ dVarSetElems fvs
-                            isFree = (`elemVarSet` fr)
-                            f v | isFree v  = Left v
-                                | isCoVar v = Right $ toIfaceCoVar v
-                                | otherwise = Right $ toIfaceTyVar v
+                            (tvs, cvs, openVars) = foldl' f ([], [], []) (dVarSetElems fvs)
+                            isOpen = (`elemVarSet` fr)
+                            f (a,b,c) v
+                              | isOpen v  = (a, b, v:c)
+                              | isCoVar v = (a, toIfaceCoVar v:b, c)
+                              | otherwise = (toIfaceTyVar v:a, b, c)
 
 toIfaceTcArgs :: TyCon -> [Type] -> IfaceAppArgs
 toIfaceTcArgs = toIfaceTcArgsX emptyVarSet
