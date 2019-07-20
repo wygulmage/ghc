@@ -277,7 +277,6 @@ toIfaceCoercionX fr co
     go_prov (PluginProv str)    = IfacePluginProv str
     go_prov (ZappedProv fvs)    = IfaceZappedProv cvs fCvs
                           where
-                            (fCvs, cvs) = partitionWith f $ dVarSetElems fvs
                             (tvs, cvs, openVars) = foldl' f ([], [], []) (dVarSetElems fvs)
                             isOpen = (`elemVarSet` fr)
                             f (a,b,c) v
