@@ -232,7 +232,7 @@ simple_opt_expr env expr
     go (Case e b ty as)
        -- See Note [Getting the map/coerce RULE to work]
       | isDeadBinder b
-      , Just (_, [], con, _tys, es) <- exprIsConApp_maybe in_scope_env e'
+      , Just (_, [], con, _tys, es) <- exprIsConApp_maybe (soe_dflags env) in_scope_env e'
         -- We don't need to be concerned about floats when looking for coerce.
       , Just (altcon, bs, rhs) <- findAlt (DataAlt con) as
       = case altcon of
@@ -886,9 +886,9 @@ data ConCont = CC [CoreExpr] Coercion
 --
 -- We also return the incoming InScopeSet, augmented with
 -- the binders from any [FloatBind] that we return
-exprIsConApp_maybe :: InScopeEnv -> CoreExpr
+exprIsConApp_maybe :: DynFlags -> InScopeEnv -> CoreExpr
                    -> Maybe (InScopeSet, [FloatBind], DataCon, [Type], [CoreExpr])
-exprIsConApp_maybe (in_scope, id_unf) expr
+exprIsConApp_maybe dflags (in_scope, id_unf) expr
   = go (Left in_scope) [] expr (CC [] (mkRepReflCo (exprType expr)))
   where
     go :: Either InScopeSet Subst
@@ -903,7 +903,7 @@ exprIsConApp_maybe (in_scope, id_unf) expr
        | not (tickishIsCode t) = go subst floats expr cont
 
     go subst floats (Cast expr co1) (CC args co2)
-       | Just (args', m_co1') <- pushCoArgs (subst_co subst co1) args
+       | Just (args', m_co1') <- pushCoArgs dflags (subst_co subst co1) args
             -- See Note [Push coercions in exprIsConApp_maybe]
        = case m_co1' of
            MCo co1' -> go subst floats expr (CC args' (co1' `mkTransCo` co2))
@@ -1152,34 +1152,37 @@ Here we implement the "push rules" from FC papers:
   by pushing the coercion into the arguments
 -}
 
-pushCoArgs :: CoercionR -> [CoreArg] -> Maybe ([CoreArg], MCoercion)
-pushCoArgs co []         = return ([], MCo co)
-pushCoArgs co (arg:args) = do { (arg',  m_co1) <- pushCoArg  co  arg
-                              ; case m_co1 of
-                                  MCo co1 -> do { (args', m_co2) <- pushCoArgs co1 args
-                                                 ; return (arg':args', m_co2) }
-                                  MRefl  -> return (arg':args, MRefl) }
+pushCoArgs :: DynFlags -> CoercionR -> [CoreArg] -> Maybe ([CoreArg], MCoercion)
+pushCoArgs _dflags co []         = return ([], MCo co)
+pushCoArgs dflags co (arg:args) = do
+  { (arg',  m_co1) <- pushCoArg dflags co arg
+  ; case m_co1 of
+      MCo co1 -> do { (args', m_co2) <- pushCoArgs dflags co1 args
+                     ; return (arg':args', m_co2) }
+      MRefl  -> return (arg':args, MRefl) }
 
-pushCoArg :: CoercionR -> CoreArg -> Maybe (CoreArg, MCoercion)
+pushCoArg :: DynFlags -> CoercionR -> CoreArg -> Maybe (CoreArg, MCoercion)
 -- We have (fun |> co) arg, and we want to transform it to
 --         (fun arg) |> co
 -- This may fail, e.g. if (fun :: N) where N is a newtype
 -- C.f. simplCast in Simplify.hs
 -- 'co' is always Representational
 -- If the returned coercion is Nothing, then it would have been reflexive
-pushCoArg co (Type ty) = do { (ty', m_co') <- pushCoTyArg co ty
-                            ; return (Type ty', m_co') }
-pushCoArg co val_arg   = do { (arg_co, m_co') <- pushCoValArg co
-                            ; return (val_arg `mkCast` arg_co, m_co') }
+pushCoArg dflags co (Type ty) = do
+  { (ty', m_co') <- pushCoTyArg dflags co ty
+  ; return (Type ty', m_co') }
+pushCoArg _dflags co val_arg   = do
+  { (arg_co, m_co') <- pushCoValArg co
+  ; return (val_arg `mkCast` arg_co, m_co') }
 
-pushCoTyArg :: CoercionR -> Type -> Maybe (Type, MCoercionR)
+pushCoTyArg :: DynFlags -> CoercionR -> Type -> Maybe (Type, MCoercionR)
 -- We have (fun |> co) @ty
 -- Push the coercion through to return
 --         (fun @ty') |> co'
 -- 'co' is always Representational
 -- If the returned coercion is Nothing, then it would have been reflexive;
 -- it's faster not to compute it, though.
-pushCoTyArg co ty
+pushCoTyArg dflags co ty
   -- The following is inefficient - don't do `eqType` here, the coercion
   -- optimizer will take care of it. See #14737.
   -- -- | tyL `eqType` tyR
@@ -1200,7 +1203,7 @@ pushCoTyArg co ty
        -- tyL = forall (a1 :: k1). ty1
        -- tyR = forall (a2 :: k2). ty2
 
-    zap = zapCoercion unsafeGlobalDynFlags
+    zap = zapCoercion dflags
 
     co1 = zap $ mkSymCo (mkNthCo Nominal 0 co)
        -- co1 :: k2 ~N k1
