@@ -219,6 +219,12 @@ field.
 The only thing we do with these variables is extend the environment using
 tcExtendNameTyVarEnv. Not doing so led to #16731.
 
+Without a TLKS, di_extra_tvs are not needed and not used at the moment:
+
+  -- No TLKS,  tyConTyVars di_rep_tc = [j,k,a,b]
+  --           di_extra_tvs = []
+  data T (a :: j) (b :: k) deriving (C j k)
+
 There's nothing in particular that would tie 'di_extra_tvs' to TLKSs, this
 field can be easily repurposed to store other extra type variables for the
 deriving context if the need arises, hence the name.

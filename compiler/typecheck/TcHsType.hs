@@ -2857,7 +2857,7 @@ checkClassKindSig kind = checkTc (tcIsConstraintKind kind) err_msg
     err_msg :: SDoc
     err_msg =
       text "Kind signature on a class must end with" <+> ppr constraintKind $$
-      text "unobscured by type families."
+      text "unobscured by type families"
 
 tcbVisibilities :: TyCon -> [Type] -> [TyConBndrVis]
 -- Result is in 1-1 correpondence with orig_args

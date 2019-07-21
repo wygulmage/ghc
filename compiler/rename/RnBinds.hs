@@ -1140,7 +1140,7 @@ and normal type signatures are elements of the same list, represented as SigD:
   SigD (TLKS (TopKindSig name ki))    -- a top-level kind signature
   SigD (TypeSig names ty)             -- a type signature
 
-However, at this point their paths diverge. 'findSplice' partitions the
+Then in 'findSplice' their paths diverge. 'findSplice' partitions the
 declarations into various fields of 'HsGroup':
 
   * TLKSs are stored in 'hs_tyclds' inside the 'group_tlkss' field of TyClGroup
