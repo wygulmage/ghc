@@ -22,8 +22,6 @@ test('tlks023', normal, ghci_script, ['tlks023.script'])
 test('tlks024', normal, compile, [''])
 test('tlks025', extra_files(['tlks025.hs']), ghci_script, ['tlks025.script'])
 test('tlks026', normal, compile, [''])
-test('tlks027', normal, compile, ['-v0 -ddump-splices -dsuppress-uniques'])
-test('tlks028', normal, compile, [''])
 test('tlks029', expect_broken(14419), compile, [''])
 test('tlks030', normal, compile, [''])
 test('T16723', normal, compile, [''])
@@ -34,3 +32,12 @@ test('T16758', expect_broken(16758), compile, [''])
 test('T16721', normal, ghci_script, ['T16721.script'])
 test('tlks031', normal, compile, [''])
 test('tlks032', normal, compile, [''])
+
+# We omit 'profasm' because it fails with:
+# Cannot load -prof objects when GHC is built with -dynamic
+#     To fix this, either:
+#       (1) Use -fexternal-interpreter, or
+#       (2) Build the program twice: once with -dynamic, and then
+#           with -prof using -osuf to set a different object file suffix.
+test('tlks027', omit_ways(['profasm']), compile, ['-v0 -ddump-splices -dsuppress-uniques'])
+test('tlks028', omit_ways(['profasm']), compile, [''])
