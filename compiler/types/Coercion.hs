@@ -1767,7 +1767,7 @@ mkZappedCoercion dflags co (Pair ty1 ty2) role fvs
     mkUnivCo (ZappedProv fvs) role ty1 ty2
   where
     (Pair real_ty1 real_ty2, real_role) = coercionKindRole co
-    real_fCvs = filterVarSet isCoVar (coVarsOfCo co)
+    real_fvs = tyCoVarsOfCoDSet co
         -- We must unify here (at the loss of some precision in the assertion)
         -- since we may encounter flattening skolems.
     --co_kind_ok = isJust $ tcUnifyTys (const BindMe) [real_ty1, real_ty2] [ty1, ty2]
@@ -1782,7 +1782,7 @@ mkZappedCoercion dflags co (Pair ty1 ty2) role fvs
         , text "given ty1:" <+> ppr ty1
         , text "real ty2:" <+> ppr real_ty2
         , text "given ty2:" <+> ppr ty2
-        , text "real free co vars:" <+> ppr real_fCvs
+        , text "real free co vars:" <+> ppr real_fvs
         , text "given free co vars:" <+> ppr fvs
         , text "coercion:" <+> ppr co
         ]
@@ -1795,7 +1795,7 @@ zapCoercion dflags co =
     mkZappedCoercion dflags co (Pair t1 t2) role fvs
   where
     (Pair t1 t2, role) = coercionKindRole co
-    fvs = filterDVarSet isCoVar $ tyCoVarsOfCoDSet co
+    fvs = tyCoVarsOfCoDSet co
 
 
 {-
