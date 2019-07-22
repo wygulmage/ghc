@@ -1257,7 +1257,7 @@ tcIfaceUnivCoProv (IfaceProofIrrelProv kco) = ProofIrrelProv <$> tcIfaceCo kco
 tcIfaceUnivCoProv (IfacePluginProv str)     = return $ PluginProv str
 tcIfaceUnivCoProv (IfaceZappedProv tvs cvs fvs)
                                             = do cvs' <- mapM tcIfaceLclId cvs
-                                                 tvs' <- mapM tcIfaceLclTyVar tvs
+                                                 tvs' <- mapM tcIfaceTyVar tvs
                                                  return $ ZappedProv $ mkDVarSet $ cvs' ++ tvs'
 
 {-
