@@ -1971,7 +1971,7 @@ kcDeclHeader name flav tlks ktvs kc_res_ki =
       -> TcM TcTyCon
     goInvis hkv d_ki subst tcb_acc stv_acc m_res_ki n_inst
       | n_inst <= 0 =
-          done hkv (substTyUnchecked subst d_ki) tcb_acc stv_acc m_res_ki
+          done hkv (substTy subst d_ki) tcb_acc stv_acc m_res_ki
       | otherwise   =  -- n_inst > 0
           case tcSplitPiTy_maybe d_ki of
             Just (Named (Bndr v Specified), d_ki') ->
@@ -1991,21 +1991,21 @@ kcDeclHeader name flav tlks ktvs kc_res_ki =
       -> (TCvSubst -> TyConBinder -> (Name,TcTyVar) -> TcM r)
       -> TcM r
     withSpecified subst v cont = do
-      let b_ki = substTyUnchecked subst (varType v)
+      let b_ki = substTy subst (varType v)
           b_name = tyVarName v
       tcv <- newSkolemTyVar b_name b_ki
       let tcb = mkNamedTyConBinder Specified tcv
           stv = (b_name, tcv)
-          subst' = extendTvSubst subst v (mkTyVarTy tcv)
+          subst' = extendTvSubstWithClone subst v tcv
       tcExtendNameTyVarEnv [stv] $
         cont subst' tcb stv
     withInferred subst v cont = do
-      let b_ki = substTyUnchecked subst (varType v)
+      let b_ki = substTy subst (varType v)
           b_name = tyVarName v
       tcv <- newSkolemTyVar b_name b_ki
       let tcb = mkNamedTyConBinder Inferred tcv
           stv = (b_name, tcv)
-          subst' = extendTvSubst subst v (mkTyVarTy tcv)
+          subst' = extendTvSubstWithClone subst v tcv
       tcExtendNameTyVarEnv [stv] $
         cont subst' tcb stv
 
@@ -2015,7 +2015,7 @@ kcDeclHeader name flav tlks ktvs kc_res_ki =
       -> (TyConBinder -> TcM r)
       -> TcM r
     withAnonInvis subst bndr_ki cont = do
-      let b_ki = substTyUnchecked subst bndr_ki
+      let b_ki = substTy subst bndr_ki
       tcv <- do
         uniq <- newUnique
         let name = mkSystemName uniq (mkTyVarOccFS (fsLit "ev"))
@@ -2030,7 +2030,7 @@ kcDeclHeader name flav tlks ktvs kc_res_ki =
       -> (TyConBinder -> (Name,TcTyVar) -> TcM r)
       -> TcM r
     withAnonVis subst b bndr_ki cont = do
-      let b_ki = substTyUnchecked subst bndr_ki
+      let b_ki = substTy subst bndr_ki
       v_name <- checkVar b_ki b
       tcv <- newSkolemTyVar v_name b_ki
       let tcb = mkAnonTyConBinder VisArg tcv
@@ -2045,13 +2045,13 @@ kcDeclHeader name flav tlks ktvs kc_res_ki =
       -> (TCvSubst -> TyConBinder -> (Name,TcTyVar) -> TcM r)
       -> TcM r
     withRequired subst b v cont = do
-      let b_ki = substTyUnchecked subst (varType v)
+      let b_ki = substTy subst (varType v)
           b_name = tyVarName v
       v_name <- checkVar b_ki b
       tcv <- newSkolemTyVar b_name b_ki
       let tcb = mkNamedTyConBinder Required tcv
           stv = (v_name, tcv)
-          subst' = extendTvSubst subst v (mkTyVarTy tcv)
+          subst' = extendTvSubstWithClone subst v tcv
       tcExtendNameTyVarEnv [stv] $
         cont subst' tcb stv
 
