@@ -1795,7 +1795,7 @@ zapCoercion dflags co =
     mkZappedCoercion dflags co (Pair t1 t2) role fvs
   where
     (Pair t1 t2, role) = coercionKindRole co
-    fvs = tyCoVarsOfCoDSet co
+    fvs = filterDVarSet (not . isCoercionHole) $ tyCoVarsOfCoDSet co
 
 
 {-
