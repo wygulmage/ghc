@@ -2023,7 +2023,7 @@ reifyKiSig th_name =
   do { thing <- getThing th_name
      ; case thing of
          AGlobal (ATyCon tc) -> reifyKind (tyConKind tc)
-         _ -> failWithTc (text "No kind  associated with" <+> (ppr thing))
+         _ -> failWithTc (text "No kind associated with" <+> (ppr thing))
      }
 
 ------------------------------
