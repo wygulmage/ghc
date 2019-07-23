@@ -242,7 +242,7 @@ data THMessage a where
   LookupName :: Bool -> String -> THMessage (THResult (Maybe TH.Name))
   Reify :: TH.Name -> THMessage (THResult TH.Info)
   ReifyFixity :: TH.Name -> THMessage (THResult (Maybe TH.Fixity))
-  ReifyKiSig :: TH.Name -> THMessage (THResult (Maybe TH.Kind))
+  ReifyKiSig :: TH.Name -> THMessage (THResult TH.Kind)
   ReifyInstances :: TH.Name -> [TH.Type] -> THMessage (THResult [TH.Dec])
   ReifyRoles :: TH.Name -> THMessage (THResult [TH.Role])
   ReifyAnnotations :: TH.AnnLookup -> TypeRep

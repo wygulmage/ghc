@@ -77,7 +77,7 @@ class (MonadIO m, Fail.MonadFail m) => Quasi m where
   qReify          :: Name -> m Info
   qReifyFixity    :: Name -> m (Maybe Fixity)
   qReifyInstances :: Name -> [Type] -> m [Dec]
-  qReifyKiSig     :: Name -> m (Maybe Kind)
+  qReifyKiSig     :: Name -> m Kind
        -- Is (n tys) an instance?
        -- Returns list of matching instance Decs
        --    (with empty sub-Decs)
@@ -431,7 +431,7 @@ example, if the function @foo@ has the fixity declaration @infixr 7 foo@, then
 reifyFixity :: Name -> Q (Maybe Fixity)
 reifyFixity nm = Q (qReifyFixity nm)
 
-reifyKiSig :: Name -> Q (Maybe Kind)
+reifyKiSig :: Name -> Q Kind
 reifyKiSig nm = Q (qReifyKiSig nm)
 
 {- | @reifyInstances nm tys@ returns a list of visible instances of @nm tys@. That is,

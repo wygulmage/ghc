@@ -2018,12 +2018,11 @@ reifyDecidedStrictness HsStrict   = TH.DecidedStrict
 reifyDecidedStrictness HsUnpack{} = TH.DecidedUnpack
 
 ------------------------------
-reifyKiSig :: TH.Name -> TcM (Maybe TH.Kind)
+reifyKiSig :: TH.Name -> TcM TH.Kind
 reifyKiSig th_name =
   do { thing <- getThing th_name
      ; case thing of
-         -- TODO (int-index): check if tyConKind has any MetaTvs and report Nothing (#10541)
-         AGlobal (ATyCon tc) -> Just <$> reifyKind (tyConKind tc)
+         AGlobal (ATyCon tc) -> reifyKind (tyConKind tc)
          _ -> failWithTc (text "No kind  associated with" <+> (ppr thing))
      }
 

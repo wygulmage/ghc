@@ -17,7 +17,7 @@ type instance Baz @(Type->Type->Type) a = Char
 $( do FamilyI foo@(ClosedTypeFamilyD (TypeFamilyHead _ tvbs1 res1 m_kind1)
                    [TySynEqn (Just bndrs1) (AppT _ lhs1) rhs1])
               [] <- reify ''Foo
-      Just sig1 <- reifyKiSig ''Foo
+      sig1 <- reifyKiSig ''Foo
       FamilyI baz@(OpenTypeFamilyD (TypeFamilyHead _ tvbs2 res2 m_kind2))
               [inst@(TySynInstD (TySynEqn (Just bndrs2) (AppT _ lhs2) rhs2))] <- reify ''Baz
       runIO $ putStrLn $ pprint sig1
