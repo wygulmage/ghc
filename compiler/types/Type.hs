@@ -639,8 +639,11 @@ mapCoercion mapper@(TyCoMapper { tcm_covar = covar
       = let bndrFVs v
               | isCoVar v = tyCoVarsOfCoDSet <$> covar env v
               | isTyVar v = tyCoVarsOfTypeDSet <$> tyvar env v
-              | otherwise = panic "mapCoercion(ZappedProv): Bad free variable"
-        in ZappedProv . unionDVarSets <$> mapM bndrFVs (dVarSetElems fvs)
+              | isCoercionHole v = return emptyDVarSet
+              | otherwise = pprPanic "mapCoercion(ZappedProv): Bad free variable" (ppr v)
+        in do fvs' <- unionDVarSets <$> mapM bndrFVs (dVarSetElems fvs)
+              pprTrace "mapCoercion(Zapped)" (ppr fvs $$ ppr fvs') $
+                return $ ZappedProv fvs'
 
 {-
 ************************************************************************

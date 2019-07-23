@@ -1463,7 +1463,8 @@ flatten_exact_fam_app_fully tc tys
                              co' = mkTcCoherenceLeftCo role xi kind_co (mkSymCo co)
                              co'_kind = Pair xi' fam_ty
                                -- co' :: (xi |> kind_co) ~role fam_ty
-                             co'' = update_co $ mkZappedCoercion dflags co' co'_kind Nominal fvs
+                             --co'' = update_co $ mkZappedCoercion dflags co' co'_kind Nominal fvs
+                             co'' = update_co co'
                        ; return $ Just (xi', co'') }
                Nothing -> pure Nothing }
 
@@ -1487,6 +1488,7 @@ flatten_exact_fam_app_fully tc tys
                        ; let co  = mkSymCo (maybeSubCo eq_rel norm_co
                                             `mkTransCo` mkSymCo final_co)
                              co' = mkZappedCoercion dflags co (Pair xi fam_ty) Nominal fvs
+                             --co' = co
                        ; return $ Just (xi, co') }
                Nothing -> pure Nothing }
 
