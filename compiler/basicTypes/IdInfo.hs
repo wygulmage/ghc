@@ -161,7 +161,9 @@ data IdDetails
   | CoVarId    -- ^ A coercion variable
                -- This only covers /un-lifted/ coercions, of type
                -- (t1 ~# t2) or (t1 ~R# t2), not their lifted variants
-  | CoercionHoleId
+  | CoercionHoleId  -- ^ A variable introduced for tracking the scoping of
+                    -- a coercion hole during typechecking. See
+                    -- Note [Coercion holes] in TyCoRep.
   | JoinId JoinArity           -- ^ An 'Id' for a join point taking n arguments
        -- Note [Join points] in CoreSyn
 

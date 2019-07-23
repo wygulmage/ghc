@@ -1717,12 +1717,15 @@ equality types story] in TysPrim for background on equality constraints.
 
 For unboxed equalities:
   - Generate a CoercionHole, a mutable variable just like a unification
-    variable
+    variable.
   - Wrap the CoercionHole in a Wanted constraint; see TcRnTypes.TcEvDest
   - Use the CoercionHole in a Coercion, via HoleCo
   - Solve the constraint later
   - When solved, fill in the CoercionHole by side effect, instead of
     doing the let-binding thing
+  - To ensure that Core Lint can catch when a CoercionHole variable
+    inappropriately persists beyond typechecking we distinguish such
+    variables by giving them the CoercionHoleId IdDetails.
 
 The main reason for all this is that there may be no good place to let-bind
 the evidence for unboxed equalities:

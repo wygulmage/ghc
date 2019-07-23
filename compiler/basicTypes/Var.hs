@@ -727,6 +727,7 @@ isCoVar :: Var -> Bool
 isCoVar (Id { id_details = details }) = isCoVarDetails details
 isCoVar _                             = False
 
+-- | Is this a CoercionHoleId? See Note [Coercion holes] in TyCoRep.
 isCoercionHole :: Var -> Bool
 isCoercionHole (Id { id_details = details }) = isCoercionHoleDetails details
 isCoercionHole _                             = False
