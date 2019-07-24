@@ -214,6 +214,14 @@ static StgWord collect_pointers(StgClosure *closure, StgWord size, StgClosure *p
             break;
 
 
+        case WEAK:
+            ptrs[nptrs++] = (StgClosure *)((StgWeak *)closure)->cfinalizers;
+            ptrs[nptrs++] = (StgClosure *)((StgWeak *)closure)->key;
+            ptrs[nptrs++] = (StgClosure *)((StgWeak *)closure)->value;
+            ptrs[nptrs++] = (StgClosure *)((StgWeak *)closure)->finalizer;
+            ptrs[nptrs++] = (StgClosure *)((StgWeak *)closure)->link;
+            break;
+
         default:
             fprintf(stderr,"closurePtrs: Cannot handle type %s yet\n",
                            closure_type_names[info->type]);
